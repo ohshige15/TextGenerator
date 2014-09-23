@@ -9,11 +9,12 @@ class PrepareChain(object):
 	チェーンを作成してDBに保存するクラス
 	"""
 
-	def __init__(self):
+	def __init__(self, text):
 		u"""
 		初期化メソッド
+		@param text チェーンを生成するための文章
 		"""
-		pass
+		self.text = text
 
 
 if __name__ == '__main__':
