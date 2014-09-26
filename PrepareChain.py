@@ -89,6 +89,14 @@ class TestFunctions(unittest.TestCase):
 		"""
 		self.text = "こんにちは。今日は、楽しい運動会です。hello world.我輩は猫である\n名前はまだない。我輩は犬である\r\n名前は決まってるよ"
 		self.chain = PrepareChain(self.text)
+	
+	def test_divide(self):
+		u"""
+		一文ずつに分割するテスト
+		"""
+		sentences = self.chain._divide(self.text)
+		answer = ["こんにちは。", "今日は、楽しい運動会です。", "hello world.", "我輩は猫である", "名前はまだない。", "我輩は犬である", "名前は決まってるよ"]
+		self.assertEqual(sentences.sort(), answer.sort())
 
 	def tearDown(self):
 		u"""
