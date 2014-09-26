@@ -17,6 +17,8 @@ class PrepareChain(object):
 		初期化メソッド
 		@param text チェーンを生成するための文章
 		"""
+		if isinstance(text, unicode):
+			text = text.encode("utf-8")
 		self.text = text
 
 	def do_prepare(self):
