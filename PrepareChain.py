@@ -4,6 +4,8 @@ u"""
 与えられた文書からマルコフ連鎖のためのチェーン（連鎖）を作成して、DBに保存するファイル
 """
 
+import unittest
+
 from collections import defaultdict
 
 
@@ -76,5 +78,24 @@ class PrepareChain(object):
 		pass
 
 
+class TestFunctions(unittest.TestCase):
+	u"""
+	テスト用クラス
+	"""
+	
+	def setUp(self):
+		u"""
+		テストが実行される前に実行される
+		"""
+		self.text = "こんにちは。今日は、楽しい運動会です。hello world.我輩は猫である\n名前はまだない。我輩は犬である\r\n名前は決まってるよ"
+		self.chain = PrepareChain(self.text)
+
+	def tearDown(self):
+		u"""
+		テストが実行された後に実行される
+		"""
+		pass
+
+
 if __name__ == '__main__':
-	pass
+	unittest.main()
