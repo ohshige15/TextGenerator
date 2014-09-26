@@ -6,6 +6,7 @@ u"""
 
 import unittest
 
+import re
 from collections import defaultdict
 
 
@@ -52,7 +53,16 @@ class PrepareChain(object):
 		@param text 分割前の文章
 		@return 一文ずつの配列
 		"""
-		pass
+		# 改行文字以外の分割文字（正規表現表記）
+		delimiter = "。|．|\."
+
+		# 全ての分割文字を改行文字に置換（splitしたときに「。」などの情報を無くさないため）
+		text = re.sub(r"({0})".format(delimiter), r"\1\n", text)
+
+		# 改行文字で分割
+		sentences = text.splitlines()
+
+		return sentences
 
 	def _morphological_analysis(self, sentence):
 		u"""
