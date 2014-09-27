@@ -168,6 +168,16 @@ class TestFunctions(unittest.TestCase):
         answer = {}
         self.assertEqual(triplet_freqs, answer)
 
+    def test_make_triplet_3morphemes(self):
+        u"""
+        形態素毎に3つ組にしてその出現回数を数えるテスト
+        ただし、形態素がちょうど3つの場合
+        """
+        morphemes = ["hello", "world", "."]
+        triplet_freqs = self.chain._make_triplet(morphemes)
+        answer = {("__BEGIN_SENTENCE__", "hello", "world"): 1, ("hello", "world", "."): 1, ("world", ".", "__END_SENTENCE__"): 1}
+        self.assertEqual(triplet_freqs, answer)
+
     def tearDown(self):
         u"""
         テストが実行された後に実行される
