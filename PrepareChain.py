@@ -7,6 +7,7 @@ u"""
 import unittest
 
 import re
+import MeCab
 from collections import defaultdict
 
 
@@ -23,6 +24,9 @@ class PrepareChain(object):
         if isinstance(text, unicode):
             text = text.encode("utf-8")
         self.text = text
+
+        # 形態素解析用タガー
+        self.tagger = MeCab.Tagger('-Ochasen')
 
     def do_prepare(self):
         u"""
@@ -70,7 +74,12 @@ class PrepareChain(object):
         @param sentence 一文
         @return 形態素で分割された配列
         """
-        pass
+        morphemes = []
+        node = self.tagger.parseToNode(sentence)
+        while node:
+            morphemes.append(node.surface)
+            node = node.next
+        return morphemes
 
     def _make_triplet(self, morphemes):
         u"""
