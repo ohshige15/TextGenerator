@@ -133,7 +133,7 @@ class TestFunctions(unittest.TestCase):
         morphemes = ["今日", "は", "、", "楽しい", "運動会", "です", "。"]
         triplet_freqs = self.chain._make_triplet(morphemes)
         answer = {("__BEGIN_SENTENCE__", "今日", "は"): 1, ("今日", "は", "、"): 1, ("は", "、", "楽しい"): 1, ("、", "楽しい", "運動会"): 1, ("楽しい", "運動会", "です"): 1, ("運動会", "です", "。"): 1, ("です", "。", "__END_SENTENCE__"): 1}
-        self.assertEqual(triplet_freqs.sort(), answer.sort())
+        self.assertEqual(triplet_freqs, answer)
 
     def tearDown(self):
         u"""
