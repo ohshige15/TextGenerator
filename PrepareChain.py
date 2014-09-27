@@ -8,6 +8,7 @@ import unittest
 
 import re
 import MeCab
+import sqlite3
 from collections import defaultdict
 
 
@@ -18,6 +19,9 @@ class PrepareChain(object):
 
     BEGIN = "__BEGIN_SENTENCE__"
     END = "__END_SENTENCE__"
+
+    DB_PATH = "chain.db"
+    DB_SCHEMA_PATH = "schema.sql"
 
     def __init__(self, text):
         u"""
@@ -113,12 +117,31 @@ class PrepareChain(object):
 
         return triplet_freqs
 
-    def save(self, triplet_freqs):
+    def save(self, triplet_freqs, init=False):
         u"""
         3つ組毎に出現回数をDBに保存
         @param triplet_freqs 3つ組とその出現回数の辞書 key: 3つ組（タプル） val: 出現回数
         """
-        pass
+        # DBオープン
+        con = sqlite3.connect(PrepareChain.DB_PATH)
+
+        # 初期化から始める場合
+        if init:
+            # DBの初期化
+            with open(PrepareChain.DB_SCHEMA_PATH, "r") as f:
+                schema = f.read()
+                con.executescript(schema)
+
+            # データ整形
+            datas = [(triplet[0].decode("utf-8"), triplet[1].decode("utf-8"), triplet[2].decode("utf-8"), freq) for (triplet, freq) in triplet_freqs.items()]
+
+            # データ挿入
+            p_statement = u"insert into chain_freqs (prefix1, prefix2, suffix, freq) values (?, ?, ?, ?)"
+            con.executemany(p_statement, datas)
+
+        # コミットしてクローズ
+        con.commit()
+        con.close()
 
     def show(self, triplet_freqs):
         u"""
