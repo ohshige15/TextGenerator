@@ -138,7 +138,7 @@ class PrepareChain(object):
                 con.executescript(schema)
 
             # データ整形
-            datas = [(triplet[0].decode("utf-8"), triplet[1].decode("utf-8"), triplet[2].decode("utf-8"), freq) for (triplet, freq) in triplet_freqs.items()]
+            datas = [(triplet[0], triplet[1], triplet[2], freq) for (triplet, freq) in triplet_freqs.items()]
 
             # データ挿入
             p_statement = u"insert into chain_freqs (prefix1, prefix2, suffix, freq) values (?, ?, ?, ?)"
