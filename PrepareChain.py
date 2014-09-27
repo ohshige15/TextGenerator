@@ -49,7 +49,7 @@ class PrepareChain(object):
             # 3つ組をつくる
             triplets = self._make_triplet(morphemes)
             # 出現回数を加算
-            for (triplet, n) in triplets:
+            for (triplet, n) in triplets.items():
                 triplet_freqs[triplet] += n
 
         return triplet_freqs
