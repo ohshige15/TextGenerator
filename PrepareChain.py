@@ -101,14 +101,14 @@ class TestFunctions(unittest.TestCase):
     u"""
     テスト用クラス
     """
-    
+
     def setUp(self):
         u"""
         テストが実行される前に実行される
         """
         self.text = "こんにちは。今日は、楽しい運動会です。hello world.我輩は猫である\n名前はまだない。我輩は犬である\r\n名前は決まってるよ"
         self.chain = PrepareChain(self.text)
-    
+
     def test_divide(self):
         u"""
         一文ずつに分割するテスト
@@ -125,6 +125,15 @@ class TestFunctions(unittest.TestCase):
         morphemes = self.chain._morphological_analysis(sentence)
         answer = ["今日", "は", "、", "楽しい", "運動会", "です", "。"]
         self.assertEqual(morphemes.sort(), answer.sort())
+
+    def test_make_triplet(self):
+        u"""
+        形態素毎に3つ組にしてその出現回数を数えるテスト
+        """
+        morphemes = ["今日", "は", "、", "楽しい", "運動会", "です", "。"]
+        triplet_freqs = self.chain._make_triplet(morphemes)
+        answer = {("__BEGIN_SENTENCE__", "今日", "は"): 1, ("今日", "は", "、"): 1, ("は", "、", "楽しい"): 1, ("、", "楽しい", "運動会"): 1, ("楽しい", "運動会", "です"): 1, ("運動会", "です", "。"): 1, ("です", "。", "__END_SENTENCE__"): 1}
+        self.assertEqual(triplet_freqs.sort(), answer.sort())
 
     def tearDown(self):
         u"""
