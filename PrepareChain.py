@@ -108,6 +108,15 @@ class TestFunctions(unittest.TestCase):
         answer = ["こんにちは。", "今日は、楽しい運動会です。", "hello world.", "我輩は猫である", "名前はまだない。", "我輩は犬である", "名前は決まってるよ"]
         self.assertEqual(sentences.sort(), answer.sort())
 
+    def test_morphological_analysis(self):
+        u"""
+        形態素解析用のテスト
+        """
+        sentence = "今日は、楽しい運動会です。"
+        morphemes = self.chain._morphological_analysis(sentence)
+        answer = ["今日", "は", "、", "楽しい", "運動会", "です", "。"]
+        self.assertEqual(morphemes.sort(), answer.sort())
+
     def tearDown(self):
         u"""
         テストが実行された後に実行される
