@@ -17,8 +17,8 @@ class PrepareChain(object):
     チェーンを作成してDBに保存するクラス
     """
 
-    BEGIN = "__BEGIN_SENTENCE__"
-    END = "__END_SENTENCE__"
+    BEGIN = u"__BEGIN_SENTENCE__"
+    END = u"__END_SENTENCE__"
 
     DB_PATH = "chain.db"
     DB_SCHEMA_PATH = "schema.sql"
@@ -28,8 +28,8 @@ class PrepareChain(object):
         初期化メソッド
         @param text チェーンを生成するための文章
         """
-        if isinstance(text, unicode):
-            text = text.encode("utf-8")
+        if isinstance(text, str):
+            text = text.decode("utf-8")
         self.text = text
 
         # 形態素解析用タガー
@@ -65,10 +65,10 @@ class PrepareChain(object):
         @return 一文ずつの配列
         """
         # 改行文字以外の分割文字（正規表現表記）
-        delimiter = "。|．|\."
+        delimiter = u"。|．|\."
 
         # 全ての分割文字を改行文字に置換（splitしたときに「。」などの情報を無くさないため）
-        text = re.sub(r"({0})".format(delimiter), r"\1\n", text)
+        text = re.sub(ur"({0})".format(delimiter), r"\1\n", text)
 
         # 改行文字で分割
         sentences = text.splitlines()
@@ -82,10 +82,12 @@ class PrepareChain(object):
         @return 形態素で分割された配列
         """
         morphemes = []
+        sentence = sentence.encode("utf-8")
         node = self.tagger.parseToNode(sentence)
         while node:
             if node.posid != 0:
-                morphemes.append(node.surface)
+                morpheme = node.surface.decode("utf-8")
+                morphemes.append(morpheme)
             node = node.next
         return morphemes
 
@@ -169,7 +171,7 @@ class TestFunctions(unittest.TestCase):
         全体のテスト
         """
         triplet_freqs = self.chain.make_triplet_freqs()
-        answer = {("__BEGIN_SENTENCE__", "今日", "は"): 1, ("今日", "は", "、"): 1, ("は", "、", "楽しい"): 1, ("、", "楽しい", "運動会"): 1, ("楽しい", "運動会", "です"): 1, ("運動会", "です", "。"): 1, ("です", "。", "__END_SENTENCE__"): 1, ("__BEGIN_SENTENCE__", "hello", "world"): 1, ("hello", "world", "."): 1, ("world", ".", "__END_SENTENCE__"): 1, ("__BEGIN_SENTENCE__", "我輩", "は"): 2, ("我輩", "は", "猫"): 1, ("は", "猫", "で"): 1, ("猫", "で", "ある"): 1, ("で", "ある", "__END_SENTENCE__"): 2, ("__BEGIN_SENTENCE__", "名前", "は"): 2, ("名前", "は", "まだ"): 1, ("は", "まだ", "ない"): 1, ("まだ", "ない", "。"): 1, ("ない", "。", "__END_SENTENCE__"): 1, ("我輩", "は", "犬"): 1, ("は", "犬", "で"): 1, ("犬", "で", "ある"): 1, ("名前", "は", "決まっ"): 1, ("は", "決まっ", "てる"): 1, ("決まっ", "てる", "よ"): 1, ("てる", "よ", "__END_SENTENCE__"): 1}
+        answer = {(u"__BEGIN_SENTENCE__", u"今日", u"は"): 1, (u"今日", u"は", u"、"): 1, (u"は", u"、", u"楽しい"): 1, (u"、", u"楽しい", u"運動会"): 1, (u"楽しい", u"運動会", u"です"): 1, (u"運動会", u"です", u"。"): 1, (u"です", u"。", u"__END_SENTENCE__"): 1, (u"__BEGIN_SENTENCE__", u"hello", u"world"): 1, (u"hello", u"world", u"."): 1, (u"world", u".", u"__END_SENTENCE__"): 1, (u"__BEGIN_SENTENCE__", u"我輩", u"は"): 2, (u"我輩", u"は", u"猫"): 1, (u"は", u"猫", u"で"): 1, (u"猫", u"で", u"ある"): 1, (u"で", u"ある", u"__END_SENTENCE__"): 2, (u"__BEGIN_SENTENCE__", u"名前", u"は"): 2, (u"名前", u"は", u"まだ"): 1, (u"は", u"まだ", u"ない"): 1, (u"まだ", u"ない", u"。"): 1, (u"ない", u"。", u"__END_SENTENCE__"): 1, (u"我輩", u"は", u"犬"): 1, (u"は", u"犬", u"で"): 1, (u"犬", u"で", u"ある"): 1, (u"名前", u"は", u"決まっ"): 1, (u"は", u"決まっ", u"てる"): 1, (u"決まっ", u"てる", u"よ"): 1, (u"てる", u"よ", u"__END_SENTENCE__"): 1}
         self.assertEqual(triplet_freqs, answer)
 
     def test_divide(self):
@@ -177,25 +179,25 @@ class TestFunctions(unittest.TestCase):
         一文ずつに分割するテスト
         """
         sentences = self.chain._divide(self.text)
-        answer = ["こんにちは。", "今日は、楽しい運動会です。", "hello world.", "我輩は猫である", "名前はまだない。", "我輩は犬である", "名前は決まってるよ"]
+        answer = [u"こんにちは。", u"今日は、楽しい運動会です。", u"hello world.", u"我輩は猫である", u"名前はまだない。", u"我輩は犬である", u"名前は決まってるよ"]
         self.assertEqual(sentences.sort(), answer.sort())
 
     def test_morphological_analysis(self):
         u"""
         形態素解析用のテスト
         """
-        sentence = "今日は、楽しい運動会です。"
+        sentence = u"今日は、楽しい運動会です。"
         morphemes = self.chain._morphological_analysis(sentence)
-        answer = ["今日", "は", "、", "楽しい", "運動会", "です", "。"]
+        answer = [u"今日", u"は", u"、", u"楽しい", u"運動会", u"です", u"。"]
         self.assertEqual(morphemes.sort(), answer.sort())
 
     def test_make_triplet(self):
         u"""
         形態素毎に3つ組にしてその出現回数を数えるテスト
         """
-        morphemes = ["今日", "は", "、", "楽しい", "運動会", "です", "。"]
+        morphemes = [u"今日", u"は", u"、", u"楽しい", u"運動会", u"です", u"。"]
         triplet_freqs = self.chain._make_triplet(morphemes)
-        answer = {("__BEGIN_SENTENCE__", "今日", "は"): 1, ("今日", "は", "、"): 1, ("は", "、", "楽しい"): 1, ("、", "楽しい", "運動会"): 1, ("楽しい", "運動会", "です"): 1, ("運動会", "です", "。"): 1, ("です", "。", "__END_SENTENCE__"): 1}
+        answer = {(u"__BEGIN_SENTENCE__", u"今日", u"は"): 1, (u"今日", u"は", u"、"): 1, (u"は", u"、", u"楽しい"): 1, (u"、", u"楽しい", u"運動会"): 1, (u"楽しい", u"運動会", u"です"): 1, (u"運動会", u"です", u"。"): 1, (u"です", u"。", u"__END_SENTENCE__"): 1}
         self.assertEqual(triplet_freqs, answer)
 
     def test_make_triplet_too_short(self):
@@ -203,7 +205,7 @@ class TestFunctions(unittest.TestCase):
         形態素毎に3つ組にしてその出現回数を数えるテスト
         ただし、形態素が少なすぎる場合
         """
-        morphemes = ["こんにちは", "。"]
+        morphemes = [u"こんにちは", u"。"]
         triplet_freqs = self.chain._make_triplet(morphemes)
         answer = {}
         self.assertEqual(triplet_freqs, answer)
@@ -213,9 +215,9 @@ class TestFunctions(unittest.TestCase):
         形態素毎に3つ組にしてその出現回数を数えるテスト
         ただし、形態素がちょうど3つの場合
         """
-        morphemes = ["hello", "world", "."]
+        morphemes = [u"hello", u"world", u"."]
         triplet_freqs = self.chain._make_triplet(morphemes)
-        answer = {("__BEGIN_SENTENCE__", "hello", "world"): 1, ("hello", "world", "."): 1, ("world", ".", "__END_SENTENCE__"): 1}
+        answer = {(u"__BEGIN_SENTENCE__", u"hello", u"world"): 1, (u"hello", u"world", u"."): 1, (u"world", u".", u"__END_SENTENCE__"): 1}
         self.assertEqual(triplet_freqs, answer)
 
     def tearDown(self):
