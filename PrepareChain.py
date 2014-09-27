@@ -132,6 +132,14 @@ class TestFunctions(unittest.TestCase):
         self.text = "こんにちは。今日は、楽しい運動会です。hello world.我輩は猫である\n名前はまだない。我輩は犬である\r\n名前は決まってるよ"
         self.chain = PrepareChain(self.text)
 
+    def test_make_triplet_freqs(self):
+        u"""
+        全体のテスト
+        """
+        triplet_freqs = self.chain.make_triplet_freqs()
+        answer = {("__BEGIN_SENTENCE__", "今日", "は"): 1, ("今日", "は", "、"): 1, ("は", "、", "楽しい"): 1, ("、", "楽しい", "運動会"): 1, ("楽しい", "運動会", "です"): 1, ("運動会", "です", "。"): 1, ("です", "。", "__END_SENTENCE__"): 1, ("__BEGIN_SENTENCE__", "hello", "world"): 1, ("hello", "world", "."): 1, ("world", ".", "__END_SENTENCE__"): 1, ("__BEGIN_SENTENCE__", "我輩", "は"): 2, ("我輩", "は", "猫"): 1, ("は", "猫", "で"): 1, ("猫", "で", "ある"): 1, ("で", "ある", "__END_SENTENCE__"): 2, ("__BEGIN_SENTENCE__", "名前", "は"): 2, ("名前", "は", "まだ"): 1, ("は", "まだ", "ない"): 1, ("まだ", "ない", "。"): 1, ("ない", "。", "__END_SENTENCE__"): 1, ("我輩", "は", "犬"): 1, ("は", "犬", "で"): 1, ("犬", "で", "ある"): 1, ("名前", "は", "決まっ"): 1, ("は", "決まっ", "てる"): 1, ("決まっ", "てる", "よ"): 1, ("てる", "よ", "__END_SENTENCE__"): 1}
+        self.assertEqual(triplet_freqs, answer)
+
     def test_divide(self):
         u"""
         一文ずつに分割するテスト
