@@ -16,6 +16,9 @@ class PrepareChain(object):
     チェーンを作成してDBに保存するクラス
     """
 
+    BEGIN = "__BEGIN_SENTENCE__"
+    END = "__END_SENTENCE__"
+
     def __init__(self, text):
         u"""
         初期化メソッド
@@ -87,7 +90,27 @@ class PrepareChain(object):
         @param morphemes 形態素配列
         @return 3つ組とその出現回数の辞書 key: 3つ組（タプル） val: 出現回数
         """
-        pass
+        # 3つ組をつくれない場合は終える
+        if len(morphemes) < 3:
+            return {}
+
+        # 出現回数の辞書
+        triplet_freqs = defaultdict(int)
+
+        # 繰り返し
+        for i in xrange(len(morphemes)-2):
+            triplet = tuple(morphemes[i:i+3])
+            triplet_freqs[triplet] += 1
+
+        # beginを追加
+        triplet = (PrepareChain.BEGIN, morphemes[0], morphemes[1])
+        triplet_freqs[triplet] = 1
+
+        # endを追加
+        triplet = (morphemes[-2], morphemes[-1], PrepareChain.END)
+        triplet_freqs[triplet] = 1
+
+        return triplet_freqs
 
     def _save(self, triplet_freqs):
         u"""
