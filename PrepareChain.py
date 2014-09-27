@@ -120,6 +120,14 @@ class PrepareChain(object):
         """
         pass
 
+    def show(self, triplet_freqs):
+        u"""
+        3つ組毎の出現回数を出力する
+        @param triplet_freqs 3つ組とその出現回数の辞書 key: 3つ組（タプル） val: 出現回数
+        """
+        for triplet in triplet_freqs:
+            print "|".join(triplet), "\t", triplet_freqs[triplet]
+
 
 class TestFunctions(unittest.TestCase):
     u"""
