@@ -73,6 +73,9 @@ class PrepareChain(object):
         # 改行文字で分割
         sentences = text.splitlines()
 
+        # 前後の空白文字を削除
+        sentences = [sentence.strip() for sentence in sentences]
+
         return sentences
 
     def _morphological_analysis(self, sentence):
@@ -163,7 +166,7 @@ class TestFunctions(unittest.TestCase):
         u"""
         テストが実行される前に実行される
         """
-        self.text = "こんにちは。今日は、楽しい運動会です。hello world.我輩は猫である\n名前はまだない。我輩は犬である\r\n名前は決まってるよ"
+        self.text = u"こんにちは。　今日は、楽しい運動会です。hello world.我輩は猫である\n  名前はまだない。我輩は犬である\r\n名前は決まってるよ"
         self.chain = PrepareChain(self.text)
 
     def test_make_triplet_freqs(self):
