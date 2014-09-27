@@ -25,6 +25,7 @@ class GenerateText(object):
     def generate(self):
         u"""
         実際に生成する
+        @return 生成された文章
         """
         # DBが存在しないときは例外をあげる
         if not os.path.exists(PrepareChain.DB_PATH):
@@ -49,6 +50,8 @@ class GenerateText(object):
     def _generate_sentence(self, con):
         u"""
         ランダムに一文を生成する
+        @param con DBコネクション
+        @return 生成された1つの文章
         """
         return u"適当な文章。"
 
