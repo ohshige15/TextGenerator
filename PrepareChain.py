@@ -31,9 +31,10 @@ class PrepareChain(object):
         # 形態素解析用タガー
         self.tagger = MeCab.Tagger('-Ochasen')
 
-    def do_prepare(self):
+    def make_triplet_freqs(self):
         u"""
-        形態素解析からDB保存まで
+        形態素解析から3つ組の出現回数まで
+        @return 3つ組とその出現回数の辞書 key: 3つ組（タプル） val: 出現回数
         """
         # 長い文章をセンテンス毎に分割
         sentences = self._divide(self.text)
@@ -51,8 +52,7 @@ class PrepareChain(object):
             for (triplet, n) in triplets:
                 triplet_freqs[triplet] += n
 
-        # DBに保存
-        self._save(triplet_freqs)
+        return triplet_freqs
 
     def _divide(self, text):
         u"""
@@ -112,7 +112,7 @@ class PrepareChain(object):
 
         return triplet_freqs
 
-    def _save(self, triplet_freqs):
+    def save(self, triplet_freqs):
         u"""
         3つ組毎に出現回数をDBに保存
         @param triplet_freqs 3つ組とその出現回数の辞書 key: 3つ組（タプル） val: 出現回数
