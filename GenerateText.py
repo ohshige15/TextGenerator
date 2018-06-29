@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-u"""
+"""
 マルコフ連鎖を用いて適当な文章を自動生成するファイル
 """
 
@@ -12,35 +12,35 @@ from PrepareChain import PrepareChain
 
 
 class GenerateText(object):
-    u"""
+    """
     文章生成用クラス
     """
 
-    def __init__(self, n=5):
-        u"""
+    def __init__(self, n=1):
+        """
         初期化メソッド
         @param n いくつの文章を生成するか
         """
         self.n = n
 
     def generate(self):
-        u"""
+        """
         実際に生成する
         @return 生成された文章
         """
         # DBが存在しないときは例外をあげる
         if not os.path.exists(PrepareChain.DB_PATH):
-            raise IOError(u"DBファイルが存在しません")
+            raise IOError("DBファイルが存在しません")
 
         # DBオープン
         con = sqlite3.connect(PrepareChain.DB_PATH)
         con.row_factory = sqlite3.Row
 
         # 最終的にできる文章
-        generated_text = u""
+        generated_text = ""
 
         # 指定の数だけ作成する
-        for i in xrange(self.n):
+        for i in range(self.n):
             text = self._generate_sentence(con)
             generated_text += text
 
@@ -50,7 +50,7 @@ class GenerateText(object):
         return generated_text
 
     def _generate_sentence(self, con):
-        u"""
+        """
         ランダムに一文を生成する
         @param con DBコネクション
         @return 生成された1つの文章
@@ -76,18 +76,18 @@ class GenerateText(object):
         return result
 
     def _get_chain_from_DB(self, con, prefixes):
-        u"""
+        """
         チェーンの情報をDBから取得する
         @param con DBコネクション
         @param prefixes チェーンを取得するprefixの条件 tupleかlist
         @return チェーンの情報の配列
         """
         # ベースとなるSQL
-        sql = u"select prefix1, prefix2, suffix, freq from chain_freqs where prefix1 = ?"
+        sql = "select prefix1, prefix2, suffix, freq from chain_freqs where prefix1 = ?"
 
         # prefixが2つなら条件に加える
         if len(prefixes) == 2:
-            sql += u" and prefix2 = ?"
+            sql += " and prefix2 = ?"
 
         # 結果
         result = []
@@ -100,7 +100,7 @@ class GenerateText(object):
         return result
 
     def _get_first_triplet(self, con):
-        u"""
+        """
         文章のはじまりの3つ組をランダムに取得する
         @param con DBコネクション
         @return 文章のはじまりの3つ組のタプル
@@ -117,7 +117,7 @@ class GenerateText(object):
         return (triplet["prefix1"], triplet["prefix2"], triplet["suffix"])
 
     def _get_triplet(self, con, prefix1, prefix2):
-        u"""
+        """
         prefix1とprefix2からsuffixをランダムに取得する
         @param con DBコネクション
         @param prefix1 1つ目のprefix
@@ -136,7 +136,7 @@ class GenerateText(object):
         return (triplet["prefix1"], triplet["prefix2"], triplet["suffix"])
 
     def _get_probable_triplet(self, chains):
-        u"""
+        """
         チェーンの配列の中から確率的に1つを返す
         @param chains チェーンの配列
         @return 確率的に選んだ3つ組
@@ -146,7 +146,7 @@ class GenerateText(object):
 
         # 確率に合うように、インデックスを入れる
         for (index, chain) in enumerate(chains):
-            for j in xrange(chain["freq"]):
+            for j in range(chain["freq"]):
                 probability.append(index)
 
         # ランダムに1つを選ぶ
@@ -157,7 +157,7 @@ class GenerateText(object):
 
 if __name__ == '__main__':
     generator = GenerateText()
-    print generator.generate()
+    print(generator.generate())
 
 
 
