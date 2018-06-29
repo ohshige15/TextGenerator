@@ -49,6 +49,7 @@ class PrepareChain(object):
         # センテンス毎に3つ組にする
         for sentence in sentences:
             # 形態素解析
+            self.tagger.parse('')
             morphemes = self._morphological_analysis(sentence)
             # 3つ組をつくる
             triplets = self._make_triplet(morphemes)
@@ -136,12 +137,12 @@ class PrepareChain(object):
                 schema = f.read()
                 con.executescript(schema)
 
-            # データ整形
-            datas = [(triplet[0], triplet[1], triplet[2], freq) for (triplet, freq) in triplet_freqs.items()]
+        # データ整形
+        datas = [(triplet[0], triplet[1], triplet[2], freq) for (triplet, freq) in list(triplet_freqs.items())]
 
-            # データ挿入
-            p_statement = u"insert into chain_freqs (prefix1, prefix2, suffix, freq) values (?, ?, ?, ?)"
-            con.executemany(p_statement, datas)
+        # データ挿入
+        p_statement = "insert into chain_freqs (prefix1, prefix2, suffix, freq) values (?, ?, ?, ?)"
+        con.executemany(p_statement, datas)
 
         # コミットしてクローズ
         con.commit()
