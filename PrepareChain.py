@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-u"""
+"""
 与えられた文書からマルコフ連鎖のためのチェーン（連鎖）を作成して、DBに保存するファイル
 """
 
@@ -13,30 +13,30 @@ from collections import defaultdict
 
 
 class PrepareChain(object):
-    u"""
+    """
     チェーンを作成してDBに保存するクラス
     """
 
-    BEGIN = u"__BEGIN_SENTENCE__"
-    END = u"__END_SENTENCE__"
+    BEGIN = "__BEGIN_SENTENCE__"
+    END = "__END_SENTENCE__"
 
     DB_PATH = "chain.db"
     DB_SCHEMA_PATH = "schema.sql"
 
     def __init__(self, text):
-        u"""
+        """
         初期化メソッド
         @param text チェーンを生成するための文章
         """
         if isinstance(text, str):
-            text = text.decode("utf-8")
+            text = text
         self.text = text
 
         # 形態素解析用タガー
         self.tagger = MeCab.Tagger('-Ochasen')
 
     def make_triplet_freqs(self):
-        u"""
+        """
         形態素解析から3つ組の出現回数まで
         @return 3つ組とその出現回数の辞書 key: 3つ組（タプル） val: 出現回数
         """
@@ -49,26 +49,27 @@ class PrepareChain(object):
         # センテンス毎に3つ組にする
         for sentence in sentences:
             # 形態素解析
+            self.tagger.parse('')
             morphemes = self._morphological_analysis(sentence)
             # 3つ組をつくる
             triplets = self._make_triplet(morphemes)
             # 出現回数を加算
-            for (triplet, n) in triplets.items():
+            for (triplet, n) in list(triplets.items()):
                 triplet_freqs[triplet] += n
 
         return triplet_freqs
 
     def _divide(self, text):
-        u"""
+        """
         「。」や改行などで区切られた長い文章を一文ずつに分ける
         @param text 分割前の文章
         @return 一文ずつの配列
         """
         # 改行文字以外の分割文字（正規表現表記）
-        delimiter = u"。|．|\."
+        delimiter = "。|．|\."
 
         # 全ての分割文字を改行文字に置換（splitしたときに「。」などの情報を無くさないため）
-        text = re.sub(ur"({0})".format(delimiter), r"\1\n", text)
+        text = re.sub(r"({0})".format(delimiter), r"\1\n", text)
 
         # 改行文字で分割
         sentences = text.splitlines()
@@ -79,23 +80,22 @@ class PrepareChain(object):
         return sentences
 
     def _morphological_analysis(self, sentence):
-        u"""
+        """
         一文を形態素解析する
         @param sentence 一文
         @return 形態素で分割された配列
         """
         morphemes = []
-        sentence = sentence.encode("utf-8")
         node = self.tagger.parseToNode(sentence)
         while node:
             if node.posid != 0:
-                morpheme = node.surface.decode("utf-8")
+                morpheme = node.surface
                 morphemes.append(morpheme)
             node = node.next
         return morphemes
 
     def _make_triplet(self, morphemes):
-        u"""
+        """
         形態素解析で分割された配列を、形態素毎に3つ組にしてその出現回数を数える
         @param morphemes 形態素配列
         @return 3つ組とその出現回数の辞書 key: 3つ組（タプル） val: 出現回数
@@ -108,7 +108,7 @@ class PrepareChain(object):
         triplet_freqs = defaultdict(int)
 
         # 繰り返し
-        for i in xrange(len(morphemes)-2):
+        for i in range(len(morphemes)-2):
             triplet = tuple(morphemes[i:i+3])
             triplet_freqs[triplet] += 1
 
@@ -123,7 +123,7 @@ class PrepareChain(object):
         return triplet_freqs
 
     def save(self, triplet_freqs, init=False):
-        u"""
+        """
         3つ組毎に出現回数をDBに保存
         @param triplet_freqs 3つ組とその出現回数の辞書 key: 3つ組（タプル） val: 出現回数
         """
@@ -137,94 +137,94 @@ class PrepareChain(object):
                 schema = f.read()
                 con.executescript(schema)
 
-            # データ整形
-            datas = [(triplet[0], triplet[1], triplet[2], freq) for (triplet, freq) in triplet_freqs.items()]
+        # データ整形
+        datas = [(triplet[0], triplet[1], triplet[2], freq) for (triplet, freq) in list(triplet_freqs.items())]
 
-            # データ挿入
-            p_statement = u"insert into chain_freqs (prefix1, prefix2, suffix, freq) values (?, ?, ?, ?)"
-            con.executemany(p_statement, datas)
+        # データ挿入
+        p_statement = "insert into chain_freqs (prefix1, prefix2, suffix, freq) values (?, ?, ?, ?)"
+        con.executemany(p_statement, datas)
 
         # コミットしてクローズ
         con.commit()
         con.close()
 
     def show(self, triplet_freqs):
-        u"""
+        """
         3つ組毎の出現回数を出力する
         @param triplet_freqs 3つ組とその出現回数の辞書 key: 3つ組（タプル） val: 出現回数
         """
         for triplet in triplet_freqs:
-            print "|".join(triplet), "\t", triplet_freqs[triplet]
+            print("|".join(triplet), "\t", triplet_freqs[triplet])
 
 
 class TestFunctions(unittest.TestCase):
-    u"""
+    """
     テスト用クラス
     """
 
     def setUp(self):
-        u"""
+        """
         テストが実行される前に実行される
         """
-        self.text = u"こんにちは。　今日は、楽しい運動会です。hello world.我輩は猫である\n  名前はまだない。我輩は犬である\r\n名前は決まってるよ"
+        self.text = "こんにちは。　今日は、楽しい運動会です。hello world.我輩は猫である\n  名前はまだない。我輩は犬である\r\n名前は決まってるよ"
         self.chain = PrepareChain(self.text)
 
     def test_make_triplet_freqs(self):
-        u"""
+        """
         全体のテスト
         """
         triplet_freqs = self.chain.make_triplet_freqs()
-        answer = {(u"__BEGIN_SENTENCE__", u"今日", u"は"): 1, (u"今日", u"は", u"、"): 1, (u"は", u"、", u"楽しい"): 1, (u"、", u"楽しい", u"運動会"): 1, (u"楽しい", u"運動会", u"です"): 1, (u"運動会", u"です", u"。"): 1, (u"です", u"。", u"__END_SENTENCE__"): 1, (u"__BEGIN_SENTENCE__", u"hello", u"world"): 1, (u"hello", u"world", u"."): 1, (u"world", u".", u"__END_SENTENCE__"): 1, (u"__BEGIN_SENTENCE__", u"我輩", u"は"): 2, (u"我輩", u"は", u"猫"): 1, (u"は", u"猫", u"で"): 1, (u"猫", u"で", u"ある"): 1, (u"で", u"ある", u"__END_SENTENCE__"): 2, (u"__BEGIN_SENTENCE__", u"名前", u"は"): 2, (u"名前", u"は", u"まだ"): 1, (u"は", u"まだ", u"ない"): 1, (u"まだ", u"ない", u"。"): 1, (u"ない", u"。", u"__END_SENTENCE__"): 1, (u"我輩", u"は", u"犬"): 1, (u"は", u"犬", u"で"): 1, (u"犬", u"で", u"ある"): 1, (u"名前", u"は", u"決まっ"): 1, (u"は", u"決まっ", u"てる"): 1, (u"決まっ", u"てる", u"よ"): 1, (u"てる", u"よ", u"__END_SENTENCE__"): 1}
+        answer = {("__BEGIN_SENTENCE__", "今日", "は"): 1, ("今日", "は", "、"): 1, ("は", "、", "楽しい"): 1, ("、", "楽しい", "運動会"): 1, ("楽しい", "運動会", "です"): 1, ("運動会", "です", "。"): 1, ("です", "。", "__END_SENTENCE__"): 1, ("__BEGIN_SENTENCE__", "hello", "world"): 1, ("hello", "world", "."): 1, ("world", ".", "__END_SENTENCE__"): 1, ("__BEGIN_SENTENCE__", "我輩", "は"): 2, ("我輩", "は", "猫"): 1, ("は", "猫", "で"): 1, ("猫", "で", "ある"): 1, ("で", "ある", "__END_SENTENCE__"): 2, ("__BEGIN_SENTENCE__", "名前", "は"): 2, ("名前", "は", "まだ"): 1, ("は", "まだ", "ない"): 1, ("まだ", "ない", "。"): 1, ("ない", "。", "__END_SENTENCE__"): 1, ("我輩", "は", "犬"): 1, ("は", "犬", "で"): 1, ("犬", "で", "ある"): 1, ("名前", "は", "決まっ"): 1, ("は", "決まっ", "てる"): 1, ("決まっ", "てる", "よ"): 1, ("てる", "よ", "__END_SENTENCE__"): 1}
         self.assertEqual(triplet_freqs, answer)
 
     def test_divide(self):
-        u"""
+        """
         一文ずつに分割するテスト
         """
         sentences = self.chain._divide(self.text)
-        answer = [u"こんにちは。", u"今日は、楽しい運動会です。", u"hello world.", u"我輩は猫である", u"名前はまだない。", u"我輩は犬である", u"名前は決まってるよ"]
+        answer = ["こんにちは。", "今日は、楽しい運動会です。", "hello world.", "我輩は猫である", "名前はまだない。", "我輩は犬である", "名前は決まってるよ"]
         self.assertEqual(sentences.sort(), answer.sort())
 
     def test_morphological_analysis(self):
-        u"""
+        """
         形態素解析用のテスト
         """
-        sentence = u"今日は、楽しい運動会です。"
+        sentence = "今日は、楽しい運動会です。"
         morphemes = self.chain._morphological_analysis(sentence)
-        answer = [u"今日", u"は", u"、", u"楽しい", u"運動会", u"です", u"。"]
+        answer = ["今日", "は", "、", "楽しい", "運動会", "です", "。"]
         self.assertEqual(morphemes.sort(), answer.sort())
 
     def test_make_triplet(self):
-        u"""
+        """
         形態素毎に3つ組にしてその出現回数を数えるテスト
         """
-        morphemes = [u"今日", u"は", u"、", u"楽しい", u"運動会", u"です", u"。"]
+        morphemes = ["今日", "は", "、", "楽しい", "運動会", "です", "。"]
         triplet_freqs = self.chain._make_triplet(morphemes)
-        answer = {(u"__BEGIN_SENTENCE__", u"今日", u"は"): 1, (u"今日", u"は", u"、"): 1, (u"は", u"、", u"楽しい"): 1, (u"、", u"楽しい", u"運動会"): 1, (u"楽しい", u"運動会", u"です"): 1, (u"運動会", u"です", u"。"): 1, (u"です", u"。", u"__END_SENTENCE__"): 1}
+        answer = {("__BEGIN_SENTENCE__", "今日", "は"): 1, ("今日", "は", "、"): 1, ("は", "、", "楽しい"): 1, ("、", "楽しい", "運動会"): 1, ("楽しい", "運動会", "です"): 1, ("運動会", "です", "。"): 1, ("です", "。", "__END_SENTENCE__"): 1}
         self.assertEqual(triplet_freqs, answer)
 
     def test_make_triplet_too_short(self):
-        u"""
+        """
         形態素毎に3つ組にしてその出現回数を数えるテスト
         ただし、形態素が少なすぎる場合
         """
-        morphemes = [u"こんにちは", u"。"]
+        morphemes = ["こんにちは", "。"]
         triplet_freqs = self.chain._make_triplet(morphemes)
         answer = {}
         self.assertEqual(triplet_freqs, answer)
 
     def test_make_triplet_3morphemes(self):
-        u"""
+        """
         形態素毎に3つ組にしてその出現回数を数えるテスト
         ただし、形態素がちょうど3つの場合
         """
-        morphemes = [u"hello", u"world", u"."]
+        morphemes = ["hello", "world", "."]
         triplet_freqs = self.chain._make_triplet(morphemes)
-        answer = {(u"__BEGIN_SENTENCE__", u"hello", u"world"): 1, (u"hello", u"world", u"."): 1, (u"world", u".", u"__END_SENTENCE__"): 1}
+        answer = {("__BEGIN_SENTENCE__", "hello", "world"): 1, ("hello", "world", "."): 1, ("world", ".", "__END_SENTENCE__"): 1}
         self.assertEqual(triplet_freqs, answer)
 
     def tearDown(self):
-        u"""
+        """
         テストが実行された後に実行される
         """
         pass
@@ -234,7 +234,7 @@ if __name__ == '__main__':
     # unittest.main()
 
     # 『檸檬』梶井基次郎
-    text = u"""えたいの知れない不吉な塊が私の心を始終圧えつけていた。焦躁と言おうか、嫌悪と言おうか――酒を飲んだあとに宿酔があるように、酒を毎日飲んでいると宿酔に相当した時期がやって来る。それが来たのだ。これはちょっといけなかった。結果した肺尖カタルや神経衰弱がいけないのではない。また背を焼くような借金などがいけないのではない。いけないのはその不吉な塊だ。以前私を喜ばせたどんな美しい音楽も、どんな美しい詩の一節も辛抱がならなくなった。蓄音器を聴かせてもらいにわざわざ出かけて行っても、最初の二三小節で不意に立ち上がってしまいたくなる。何かが私を居堪らずさせるのだ。それで始終私は街から街を浮浪し続けていた。
+    text = """えたいの知れない不吉な塊が私の心を始終圧えつけていた。焦躁と言おうか、嫌悪と言おうか――酒を飲んだあとに宿酔があるように、酒を毎日飲んでいると宿酔に相当した時期がやって来る。それが来たのだ。これはちょっといけなかった。結果した肺尖カタルや神経衰弱がいけないのではない。また背を焼くような借金などがいけないのではない。いけないのはその不吉な塊だ。以前私を喜ばせたどんな美しい音楽も、どんな美しい詩の一節も辛抱がならなくなった。蓄音器を聴かせてもらいにわざわざ出かけて行っても、最初の二三小節で不意に立ち上がってしまいたくなる。何かが私を居堪らずさせるのだ。それで始終私は街から街を浮浪し続けていた。
 　何故だかその頃私は見すぼらしくて美しいものに強くひきつけられたのを覚えている。風景にしても壊れかかった街だとか、その街にしてもよそよそしい表通りよりもどこか親しみのある、汚い洗濯物が干してあったりがらくたが転がしてあったりむさくるしい部屋が覗いていたりする裏通りが好きであった。雨や風が蝕んでやがて土に帰ってしまう、と言ったような趣きのある街で、土塀が崩れていたり家並が傾きかかっていたり――勢いのいいのは植物だけで、時とするとびっくりさせるような向日葵があったりカンナが咲いていたりする。
 　時どき私はそんな路を歩きながら、ふと、そこが京都ではなくて京都から何百里も離れた仙台とか長崎とか――そのような市へ今自分が来ているのだ――という錯覚を起こそうと努める。私は、できることなら京都から逃げ出して誰一人知らないような市へ行ってしまいたかった。第一に安静。がらんとした旅館の一室。清浄な蒲団。匂いのいい蚊帳と糊のよくきいた浴衣。そこで一月ほど何も思わず横になりたい。希わくはここがいつの間にかその市になっているのだったら。――錯覚がようやく成功しはじめると私はそれからそれへ想像の絵具を塗りつけてゆく。なんのことはない、私の錯覚と壊れかかった街との二重写しである。そして私はその中に現実の私自身を見失うのを楽しんだ。
 　私はまたあの花火というやつが好きになった。花火そのものは第二段として、あの安っぽい絵具で赤や紫や黄や青や、さまざまの縞模様を持った花火の束、中山寺の星下り、花合戦、枯れすすき。それから鼠花火というのは一つずつ輪になっていて箱に詰めてある。そんなものが変に私の心を唆った。
